@@ -7,8 +7,9 @@ bot = telebot.TeleBot(constants.token)
 login = constants.login
 password = constants.password
 selectedOption = ''
-like_tag = ''
+value = ''
 option_name = ''
+
 
 @bot.message_handler(commands=['start'])
 def start_message(message):
@@ -73,16 +74,22 @@ def authorization(message):
 
 
 def choice(message):
-    global like_tag
-    like_tag = message.text
-    print(like_tag)
+    global value
+    value = message.text
+    print(value)
     if selectedOption.lower() == 'лайк':
-        bot.send_message(message.from_user.id, 'Бот ставит 30 лайков в час по хештегу: ' + str(like_tag))
-        session.set_quota_supervisor(enabled=True, peak_likes_hourly=30, peak_likes_daily=800)
-        session.like_by_tags([str(like_tag)], amount=10000)
+        bot.send_message(message.from_user.id, 'Бот ставит 30 лайков в час по хештегу: ' + str(value))
+        session.set_quota_supervisor(enabled=True, peak_likes_hourly=30, peak_likes_daily=800, sleep_after=["likes_d"], sleepyhead=True)
+        session.like_by_tags([str(value)], amount=10000)
+    elif selectedOption.lower() == 'комментарий':
+        bot.send_message(message.from_user.id, 'Бот пишет 20 комментариев в час: ' + str(value))
+        session.set_quota_supervisor(enabled=True, peak_comments_daily=200, peak_comments_hourly=20, sleep_after=["comments_d"], sleepyhead=True)
+        session.set_do_comment(enabled=True, percentage=25)
+        session.set_comments([str(value)])
+    elif selectedOption.lower() == 'подписка':
+        bot.send_message(message.from_user.id, 'Бот подписывается на 15 человек в час')
+        session.set_quota_supervisor(enabled=True, peak_follows_daily=200, peak_likes_hourly=15, sleep_after=["follows_d"], sleepyhead=True)
+        session.set_do_follow(enabled=True, percentage=10, times=10000)
 
 
 bot.polling(none_stop=True)
-
-#
-# session.like_by_tags(["style", "look"], amount=5)
