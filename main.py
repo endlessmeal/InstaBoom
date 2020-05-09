@@ -21,16 +21,14 @@ def start_message(message):
 
 @bot.message_handler(content_types=['text'])
 def send_text(message):
+    global option_name
     if message.text.lower() == 'лайк':
-        global option_name
         option_name = 'хештег'
         bot.send_message(message.from_user.id, selected(message))
     elif message.text.lower() == 'комментарий':
-        global option_name
         option_name = 'комментарий'
         bot.send_message(message.from_user.id, selected(message))
     elif message.text.lower() == 'подписка':
-        global option_name
         option_name = 'количество'
         bot.send_message(message.from_user.id, selected(message))
 
@@ -65,6 +63,9 @@ def authorization(message):
     print(message.text)
     global session
     session = InstaPy(username=str(login), password=str(password), want_check_browser=False, headless_browser=True)
+    session.set_quota_supervisor(enabled=True, peak_likes_hourly=11, peak_likes_daily=800, peak_comments_daily=200,
+                                 peak_comments_hourly=20, peak_follows_daily=200, peak_follows_hourly=15,
+                                 sleep_after=["likes_d", "comments_d", "follows_d"], sleepyhead=True)
     if session.login():
         bot.send_message(message.from_user.id, 'Успешно' + '\n' + 'Введите ' + option_name)
         bot.register_next_step_handler(message, choice)
@@ -79,17 +80,14 @@ def choice(message):
     print(value)
     if selectedOption.lower() == 'лайк':
         bot.send_message(message.from_user.id, 'Бот ставит 30 лайков в час по хештегу: ' + str(value))
-        session.set_quota_supervisor(enabled=True, peak_likes_hourly=30, peak_likes_daily=800, sleep_after=["likes_d"], sleepyhead=True)
-        session.like_by_tags([str(value)], amount=10000)
+        session.like_by_tags([str(value)], amount=100)
     elif selectedOption.lower() == 'комментарий':
         bot.send_message(message.from_user.id, 'Бот пишет 20 комментариев в час: ' + str(value))
-        session.set_quota_supervisor(enabled=True, peak_comments_daily=200, peak_comments_hourly=20, sleep_after=["comments_d"], sleepyhead=True)
         session.set_do_comment(enabled=True, percentage=25)
         session.set_comments([str(value)])
     elif selectedOption.lower() == 'подписка':
         bot.send_message(message.from_user.id, 'Бот подписывается на 15 человек в час')
-        session.set_quota_supervisor(enabled=True, peak_follows_daily=200, peak_likes_hourly=15, sleep_after=["follows_d"], sleepyhead=True)
-        session.set_do_follow(enabled=True, percentage=10, times=10000)
+        session.set_do_follow(enabled=True, percentage=10, times=1000)
 
 
 bot.polling(none_stop=True)
