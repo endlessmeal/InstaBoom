@@ -4,8 +4,6 @@ import telebot
 import constants
 
 bot = telebot.TeleBot(constants.token)
-login = constants.login
-password = constants.password
 selectedOption = ''
 value = ''
 option_name = ''
